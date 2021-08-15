@@ -3,7 +3,7 @@
 extern crate embedded_hal as hal;
 
 use hal::blocking::spi::{Transfer, Write};
-use hal::digital::v2::OutputPin;
+use hal::digital::OutputPin;
 
 #[macro_use]
 pub mod lowlevel;

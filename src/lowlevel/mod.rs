@@ -1,6 +1,6 @@
 //! Low level unrestricted access to the CC1101 radio chip.
 use hal::blocking::spi::{Transfer, Write};
-use hal::digital::v2::OutputPin;
+use hal::digital::OutputPin;
 
 #[macro_use]
 mod macros;
@@ -45,10 +45,10 @@ where
     where
         R: Into<Register>,
     {
-        self.cs.set_low().map_err(Error::Gpio)?;
+        self.cs.try_set_low().map_err(Error::Gpio)?;
         let mut buffer = [reg.into().raddr(), 0u8];
-        self.spi.transfer(&mut buffer).map_err(Error::Spi)?;
-        self.cs.set_high().map_err(Error::Gpio)?;
+        self.spi.try_transfer(&mut buffer).map_err(Error::Spi)?;
+        self.cs.try_set_high().map_err(Error::Gpio)?;
         Ok(buffer[1])
     }
 
@@ -60,10 +60,10 @@ where
     ) -> Result<(), Error<SpiE, GpioE>> {
         let mut buffer = [Command::FIFO.addr() | 0xC0, 0, 0];
 
-        self.cs.set_low().map_err(Error::Gpio)?;
-        self.spi.transfer(&mut buffer).map_err(Error::Spi)?;
-        self.spi.transfer(buf).map_err(Error::Spi)?;
-        self.cs.set_high().map_err(Error::Gpio)?;
+        self.cs.try_set_low().map_err(Error::Gpio)?;
+        self.spi.try_transfer(&mut buffer).map_err(Error::Spi)?;
+        self.spi.try_transfer(buf).map_err(Error::Spi)?;
+        self.cs.try_set_high().map_err(Error::Gpio)?;
 
         *len = buffer[1];
         *addr = buffer[2];
@@ -72,9 +72,9 @@ where
     }
 
     pub fn write_strobe(&mut self, com: Command) -> Result<(), Error<SpiE, GpioE>> {
-        self.cs.set_low().map_err(Error::Gpio)?;
-        self.spi.write(&[com.addr()]).map_err(Error::Spi)?;
-        self.cs.set_high().map_err(Error::Gpio)?;
+        self.cs.try_set_low().map_err(Error::Gpio)?;
+        self.spi.try_write(&[com.addr()]).map_err(Error::Spi)?;
+        self.cs.try_set_high().map_err(Error::Gpio)?;
         Ok(())
     }
 
@@ -82,9 +82,9 @@ where
     where
         R: Into<Register>,
     {
-        self.cs.set_low().map_err(Error::Gpio)?;
-        self.spi.write(&mut [reg.into().waddr(), byte]).map_err(Error::Spi)?;
-        self.cs.set_high().map_err(Error::Gpio)?;
+        self.cs.try_set_low().map_err(Error::Gpio)?;
+        self.spi.try_write(&mut [reg.into().waddr(), byte]).map_err(Error::Spi)?;
+        self.cs.try_set_high().map_err(Error::Gpio)?;
         Ok(())
     }
 
